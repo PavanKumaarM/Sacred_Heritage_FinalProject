@@ -1,20 +1,53 @@
 
+import { Link } from "react-router-dom";
+
 function TempleCard({ temple }) {
+  if (!temple || !temple._id) {
+    return null;
+  }
+
   return (
     <div className="temple-card">
 
-      <img
-        src={temple.image || "/temple-placeholder.png"}
-        alt={temple.name}
-      />
+      <Link
+        to={`/temples/${temple._id}`}
+        className="temple-card-link"
+      >
 
-      <h2>{temple.name}</h2>
+        <img
+          src={temple.image || "/temple-placeholder.png"}
+          alt={temple.name || "Temple"}
+          onError={(event) => {
+            event.currentTarget.onerror = null;
+            event.currentTarget.src = "/temple-placeholder.png";
+          }}
+        />
 
-      <p>Location: {temple.location}</p>
+        <div className="temple-card-content">
 
-      <p>Deity: {temple.deity}</p>
+          <h2>{temple.name || "Unnamed Temple"}</h2>
 
-      <p>{temple.description}</p>
+          <p>
+            <strong>Location:</strong>{" "}
+            {temple.location || "Not available"}
+          </p>
+
+          <p>
+            <strong>Deity:</strong>{" "}
+            {temple.deity || "Not specified"}
+          </p>
+
+          <p>
+            {temple.description || "Explore this sacred temple."}
+          </p>
+
+          <span className="temple-card-button">
+            Explore Temple →
+          </span>
+
+        </div>
+
+      </Link>
 
     </div>
   );
