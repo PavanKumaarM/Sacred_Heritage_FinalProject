@@ -1,0 +1,38 @@
+
+:root {
+  /* Primary colours */
+  --primary-color: #762f29;
+  --primary-dark: #54201d;
+  --primary-light: #9b5147;
+
+  /* Gold colours */
+  --gold-color: #c49a45;
+  --gold-light: #ead8ae;
+
+  /* Background colours */
+  --background-color: #fbf8f4;
+  --surface-color: #ffffff;
+  --secondary-background: #f3ebe2;
+
+  /* Text colours */
+  --text-primary: #29201c;
+  --text-secondary: #786e67;
+  --text-light: #ffffff;
+
+  /* Borders and shadows */
+  --border-color: #e9e0d6;
+  --card-shadow: 0 6px 20px rgba(65, 38, 27, 0.08);
+
+  /* Status colours */
+  --success-color: #27834b;
+  --error-color: #c0392b;
+  --warning-color: #d18b27;
+
+  /* Spacing */
+  --radius-small: 6px;
+  --radius-medium: 12px;
+  --radius-large: 18px;
+
+  /* Layout */
+  --container-width: 1240px;
+}
