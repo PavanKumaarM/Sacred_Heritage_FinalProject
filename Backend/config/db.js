@@ -2,20 +2,15 @@ const mongoose = require("mongoose");
 
 const connectDB = async () => {
     try {
-        const mongoURI = process.env.MONGO_URI;
-
-        console.log("Mongo URI loaded:", !!mongoURI);
-
-        if (!mongoURI) {
-            throw new Error("MONGO_URI not found. Check Backend/.env");
-        }
-
-        await mongoose.connect(mongoURI);
+        await mongoose.connect(process.env.MONGO_URI, {
+            dbName: "test"
+        });
 
         console.log("MongoDB Connected Successfully");
+        console.log("Database:", mongoose.connection.name);
 
     } catch (error) {
-        console.error("MongoDB Error:", error.message);
+        console.log("MongoDB Connection Error:", error.message);
         process.exit(1);
     }
 };

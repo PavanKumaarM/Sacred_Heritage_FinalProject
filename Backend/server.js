@@ -1,60 +1,70 @@
 const path = require("path");
 
 require("dotenv").config({
-    path: path.join(__dirname, ".env")
+  path: path.join(__dirname, ".env"),
 });
+
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
-
-const cartRoutes = require("./routes/cart.routes");
-const couponRoutes = require("./routes/coupon.routes");
-const orderRoutes = require("./routes/order.routes");
-const paymentRoutes = require("./routes/payment.routes");
-const darshanRoutes = require("./routes/darshan.routes");
-const bookingRoutes = require("./routes/booking.routes");
-const historyRoutes = require("./routes/history.routes");
+const errorMiddleware = require("./middleware/errorMiddleware");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Sacred Heritage Backend Running Successfully",
+  });
+});
 
 app.get("/api/health", (req, res) => {
-    res.json({
-        success: true,
-        message: "Transaction Backend Running"
-    });
+  res.json({
+    success: true,
+    message: "Transaction Backend Running",
+  });
 });
 
-app.use("/api/cart", cartRoutes);
-app.use("/api/coupons", couponRoutes);
-app.use("/api/orders", orderRoutes);
-app.use("/api/payments", paymentRoutes);
-app.use("/api/darshan", darshanRoutes);
-app.use("/api/bookings", bookingRoutes);
-app.use("/api/history", historyRoutes);
+app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/users", require("./routes/userRoutes"));
+app.use("/api/temples", require("./routes/templeRoutes"));
+app.use("/api/categories", require("./routes/categoryRoutes"));
+app.use("/api/products", require("./routes/productRoutes"));
+app.use("/api/reviews", require("./routes/reviewRoutes"));
+
+app.use("/api/cart", require("./routes/cart.routes"));
+app.use("/api/coupons", require("./routes/coupon.routes"));
+app.use("/api/orders", require("./routes/order.routes"));
+app.use("/api/payments", require("./routes/payment.routes"));
+app.use("/api/darshan", require("./routes/darshan.routes"));
+app.use("/api/bookings", require("./routes/booking.routes"));
+app.use("/api/history", require("./routes/history.routes"));
 
 app.use((req, res) => {
-    res.status(404).json({
-        success: false,
-        message: "API route not found"
-    });
+  res.status(404).json({
+    success: false,
+    message: "API route not found",
+  });
 });
 
-app.use((err, req, res, next) => {
-    console.error(err);
+app.use(errorMiddleware);
 
-    res.status(err.status || 500).json({
-        success: false,
-        message: err.message || "Internal server error"
-    });
-});
+const PORT = process.env.PORT || 7000;
 
-const PORT = process.env.PORT || 5000;
-
-connectDB().then(() => {
+async function startServer() {
+  try {
+    await connectDB();
     app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
+      console.log(`Server running on port ${PORT}`);
     });
-});
+  } catch (error) {
+    console.error("Server startup failed:", error.message);
+    process.exit(1);
+  }
+}
+
+startServer();
