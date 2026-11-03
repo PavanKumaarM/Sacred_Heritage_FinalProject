@@ -6,7 +6,7 @@ async function request(endpoint, method = "GET", body = null) {
   const token = localStorage.getItem("token");
 
   const headers = {
-    "Content-Type": "application/json",
+    "Content-Type": "application/json"
   };
 
   if (token) {
@@ -15,7 +15,7 @@ async function request(endpoint, method = "GET", body = null) {
 
   const options = {
     method,
-    headers,
+    headers
   };
 
   if (body !== null) {
@@ -24,10 +24,23 @@ async function request(endpoint, method = "GET", body = null) {
 
   const response = await fetch(`${API_URL}${endpoint}`, options);
 
-  const data = await response.json();
+  // Handle empty responses safely
+  const text = await response.text();
+
+  let data = {};
+
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = { message: text };
+    }
+  }
 
   if (!response.ok) {
-    throw new Error(data.message || "Something went wrong");
+    throw new Error(
+      data.message || `Request failed with status ${response.status}`
+    );
   }
 
   return data;
@@ -43,7 +56,7 @@ const api = {
     request(endpoint, "PATCH", body),
 
   delete: (endpoint) =>
-    request(endpoint, "DELETE"),
+    request(endpoint, "DELETE")
 };
 
 export default api;

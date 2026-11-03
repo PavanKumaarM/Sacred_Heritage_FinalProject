@@ -2,50 +2,64 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import authService from "../../services/authService";
 
+// Register user
 export const registerUser = createAsyncThunk(
-  "auth/register",
-  async (userData, { rejectWithValue }) => {
+  "auth/registerUser",
+  async (userData, thunkAPI) => {
     try {
       const response = await authService.register(userData);
+
+      if (response.data?.token) {
+        localStorage.setItem("token", response.data.token);
+      }
+
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue(error.message);
     }
   }
 );
 
+// Login user
 export const loginUser = createAsyncThunk(
-  "auth/login",
-  async (credentials, { rejectWithValue }) => {
+  "auth/loginUser",
+  async (loginData, thunkAPI) => {
     try {
-      const response = await authService.login(credentials);
+      const response = await authService.login(loginData);
+
+      if (response.data?.token) {
+        localStorage.setItem("token", response.data.token);
+      }
+
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue(error.message);
     }
   }
 );
 
+// Fetch logged-in user's profile
 export const fetchProfile = createAsyncThunk(
-  "auth/profile",
-  async (_, { rejectWithValue }) => {
+  "auth/fetchProfile",
+  async (_, thunkAPI) => {
     try {
       const response = await authService.getProfile();
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue(error.message);
     }
   }
 );
 
+// Update profile
 export const updateProfile = createAsyncThunk(
   "auth/updateProfile",
-  async (profileData, { rejectWithValue }) => {
+  async (profileData, thunkAPI) => {
     try {
       const response = await authService.updateProfile(profileData);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue(error.message);
     }
   }
 );
@@ -56,9 +70,10 @@ const authSlice = createSlice({
   initialState: {
     user: null,
     token: localStorage.getItem("token"),
+    isAuthenticated: Boolean(localStorage.getItem("token")),
     loading: false,
     error: null,
-    isAuthenticated: Boolean(localStorage.getItem("token")),
+    successMessage: ""
   },
 
   reducers: {
@@ -66,7 +81,6 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
-      state.error = null;
 
       localStorage.removeItem("token");
     },
@@ -74,26 +88,27 @@ const authSlice = createSlice({
     clearAuthError: (state) => {
       state.error = null;
     },
+
+    clearAuthMessage: (state) => {
+      state.successMessage = "";
+    }
   },
 
   extraReducers: (builder) => {
     builder
 
-      // Registration
+      // Register
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
-        state.isAuthenticated = true;
-
-        localStorage.setItem("token", action.payload.token);
+        state.isAuthenticated = Boolean(action.payload.token);
+        state.successMessage = "Registration successful!";
       })
-
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
@@ -104,61 +119,61 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
-        state.isAuthenticated = true;
-
-        localStorage.setItem("token", action.payload.token);
+        state.isAuthenticated = Boolean(action.payload.token);
+        state.successMessage = "Login successful!";
       })
-
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
-      // Get profile
+      // Fetch profile
       .addCase(fetchProfile.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-
       .addCase(fetchProfile.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
         state.isAuthenticated = true;
       })
-
       .addCase(fetchProfile.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-        state.user = null;
-        state.token = null;
-        state.isAuthenticated = false;
+      state.loading = false;
+      state.error = action.payload;
 
-        localStorage.removeItem("token");
+      state.user = null;
+      state.token = null;
+      state.isAuthenticated = false;
+
+      localStorage.removeItem("token");
       })
 
       // Update profile
       .addCase(updateProfile.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.successMessage = "";
       })
-
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
+        state.successMessage = "Profile updated successfully!";
       })
-
       .addCase(updateProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
-  },
+  }
 });
 
-export const { logout, clearAuthError } = authSlice.actions;
+export const {
+  logout,
+  clearAuthError,
+  clearAuthMessage
+} = authSlice.actions;
 
 export default authSlice.reducer;

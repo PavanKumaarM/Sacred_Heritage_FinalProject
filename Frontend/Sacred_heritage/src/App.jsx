@@ -1,93 +1,169 @@
 
+import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
-import Navbar from "./components/layout/Navbar.jsx";
-import Footer from "./components/layout/Footer.jsx";
+import { fetchProfile } from "./redux/slices/authSlice";
 
-import Home from "./pages/Home.jsx";
-import ExploreTemples from "./pages/ExploreTemples.jsx";
-import TempleDetails from "./pages/TempleDetails.jsx";
-import TempleProducts from "./pages/TempleProducts.jsx";
-import ProductDetails from "./pages/ProductDetails.jsx";
-import DarshanOptions from "./pages/DarshanOptions.jsx";
-import DarshanBooking from "./pages/DarshanBooking.jsx";
-import Cart from "./pages/Cart.jsx";
-import Checkout from "./pages/Checkout.jsx";
-import MyBookings from "./pages/MyBookings.jsx";
-import MyOrders from "./pages/MyOrders.jsx";
-import Favorites from "./pages/Favorites.jsx";
-import About from "./pages/About.jsx";
-import Login from "./pages/Login.jsx";
-import Register from "./pages/Register.jsx";
-import Admin from "./pages/Admin.jsx";
+import Navbar from "./components/layout/Navbar";
+import Footer from "./components/layout/Footer";
+import Loader from "./components/common/Loader";
+import ProtectedRoute from "./components/common/ProtectedRoute";
+import AdminRoute from "./components/common/AdminRoute";
 
-export default function App() {
+import Home from "./pages/Home";
+import ExploreTemples from "./pages/ExploreTemples";
+import TempleDetails from "./pages/TempleDetails";
+import TempleProducts from "./pages/TempleProducts";
+import TempleSpecificProducts from "./pages/TempleSpecificProducts";
+import ProductDetails from "./pages/ProductDetails";
+import Cart from "./pages/Cart";
+import Favorites from "./pages/Favorites";
+
+import DarshanOptions from "./pages/DarshanOptions";
+import DarshanBooking from "./pages/DarshanBooking";
+import MyBookings from "./pages/MyBookings";
+
+import Checkout from "./pages/Checkout";
+import MyOrders from "./pages/MyOrders";
+import OrderDetails from "./pages/OrderDetails";
+
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Profile from "./pages/Profile";
+import About from "./pages/About";
+import Admin from "./pages/Admin";
+
+import NotFound from "./pages/NotFound";
+
+
+function App() {
+  const dispatch = useDispatch();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  // Restore the user's session after a page refresh
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      dispatch(fetchProfile()).finally(() => {
+        setCheckingAuth(false);
+      });
+    } else {
+      setCheckingAuth(false);
+    }
+  }, [dispatch]);
+
+  if (checkingAuth) {
+    return <Loader message="Restoring your session..." />;
+  }
+
   return (
-    <div className="app-shell">
+    <>
       <Navbar />
 
-      <main className="page-content">
+      <main>
         <Routes>
+          
+          <Route path="*" element={<NotFound />} />
+
           <Route path="/" element={<Home />} />
 
           <Route path="/temples" element={<ExploreTemples />} />
-
-          <Route
-            path="/temples/:id"
-            element={<TempleDetails />}
-          />
+          <Route path="/temples/:id" element={<TempleDetails />} />
 
           <Route
             path="/temples/:id/products"
-            element={<TempleProducts />}
+            element={<TempleSpecificProducts />}
           />
 
-          <Route
-            path="/products/:id"
-            element={<ProductDetails />}
-          />
+          <Route path="/products" element={<TempleProducts />} />
+          <Route path="/products/:id" element={<ProductDetails />} />
 
           <Route
-            path="/darshan/:templeId"
+            path="/temples/:id/darshan"
             element={<DarshanOptions />}
           />
 
           <Route
-            path="/darshan/:templeId/book"
+            path="/darshan/:templeId/book/:darshanTypeId"
             element={<DarshanBooking />}
           />
 
-          <Route path="/cart" element={<Cart />} />
+          <Route
+            path="/my-bookings"
+            element={
+              <ProtectedRoute>
+                <MyBookings />
+              </ProtectedRoute>
+            }
+          />
 
-          <Route path="/checkout" element={<Checkout />} />
-
-          <Route path="/my-bookings" element={<MyBookings />} />
-
-          <Route path="/my-orders" element={<MyOrders />} />
+          <Route
+            path="/cart"
+            element={
+              <ProtectedRoute>
+                <Cart />
+              </ProtectedRoute>
+            }
+          />
 
           <Route path="/favorites" element={<Favorites />} />
 
-          <Route path="/about" element={<About />} />
-
-          <Route path="/login" element={<Login />} />
-
-          <Route path="/register" element={<Register />} />
-
-          <Route path="/admin" element={<Admin />} />
+          <Route
+            path="/checkout"
+            element={
+              <ProtectedRoute>
+                <Checkout />
+              </ProtectedRoute>
+            }
+          />
 
           <Route
-            path="*"
+            path="/my-orders"
             element={
-              <div className="not-found">
-                <h1>404</h1>
-                <p>Page not found</p>
-              </div>
+              <ProtectedRoute>
+                <MyOrders />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/my-orders/:id"
+            element={
+              <ProtectedRoute>
+                <OrderDetails />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/about" element={<About />} />
+
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <Admin />
+              </AdminRoute>
             }
           />
         </Routes>
       </main>
 
       <Footer />
-    </div>
+    </>
   );
 }
+
+export default App;
