@@ -20,7 +20,7 @@ function Navbar() {
 
   const { cart } = useSelector((state) => state.cart);
 
-  // Fetch cart when user is logged in
+  // Fetch cart when the user is logged in
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(fetchCart());
@@ -45,8 +45,9 @@ function Navbar() {
     };
   }, []);
 
+  // Calculate total cart quantity
   const cartCount = (cart?.items || []).reduce(
-    (total, item) => total + item.quantity,
+    (total, item) => total + (Number(item.quantity) || 0),
     0
   );
 
@@ -55,7 +56,7 @@ function Navbar() {
     ? user.name.charAt(0).toUpperCase()
     : "U";
 
-  // Logout functionality
+  // Logout
   function handleLogout() {
     dispatch(logout());
     setShowDropdown(false);
@@ -98,17 +99,15 @@ function Navbar() {
             <Link to="/my-bookings">My Bookings</Link>
             <Link to="/my-orders">My Orders</Link>
 
-            {user?.role === "admin" && (
-              <Link to="/admin">Admin</Link>
-            )}
-
             {/* Avatar Dropdown */}
-            <div className="avatar-dropdown" ref={dropdownRef}>
-
+            <div
+              className="avatar-dropdown"
+              ref={dropdownRef}
+            >
               <button
                 type="button"
                 className="avatar-button"
-                onClick={() => setShowDropdown(!showDropdown)}
+                onClick={() => setShowDropdown((prev) => !prev)}
                 aria-label="Open account menu"
                 aria-expanded={showDropdown}
               >
@@ -118,7 +117,7 @@ function Navbar() {
               {showDropdown && (
                 <div className="avatar-menu">
 
-                  {/* Static Username */}
+                  {/* User Information */}
                   <div className="avatar-user-info">
                     <div className="avatar-menu-letter">
                       {avatarLetter}

@@ -2,7 +2,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import orderService from "../../services/orderService";
 
-// Create order
+// Create an order from the cart
 export const createOrder = createAsyncThunk(
   "orders/createOrder",
   async (orderData, thunkAPI) => {
@@ -28,7 +28,7 @@ export const fetchMyOrders = createAsyncThunk(
   }
 );
 
-// Fetch one order
+// Fetch a single order by ID
 export const fetchOrderById = createAsyncThunk(
   "orders/fetchOrderById",
   async (orderId, thunkAPI) => {
@@ -50,7 +50,7 @@ const ordersSlice = createSlice({
     loading: false,
     actionLoading: false,
     error: null,
-    successMessage: ""
+    successMessage: "",
   },
 
   reducers: {
@@ -64,7 +64,7 @@ const ordersSlice = createSlice({
 
     clearSelectedOrder: (state) => {
       state.selectedOrder = null;
-    }
+    },
   },
 
   extraReducers: (builder) => {
@@ -76,52 +76,62 @@ const ordersSlice = createSlice({
         state.error = null;
         state.successMessage = "";
       })
+
       .addCase(createOrder.fulfilled, (state, action) => {
         state.actionLoading = false;
         state.selectedOrder = action.payload;
-        state.orders.unshift(action.payload);
+
+        if (action.payload) {
+          state.orders.unshift(action.payload);
+        }
+
         state.successMessage = "Order placed successfully!";
       })
+
       .addCase(createOrder.rejected, (state, action) => {
         state.actionLoading = false;
         state.error = action.payload;
       })
 
-      // Fetch orders
+      // Fetch all orders
       .addCase(fetchMyOrders.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
+
       .addCase(fetchMyOrders.fulfilled, (state, action) => {
         state.loading = false;
         state.orders = action.payload;
       })
+
       .addCase(fetchMyOrders.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
-      // Fetch order details
+      // Fetch individual order
       .addCase(fetchOrderById.pending, (state) => {
         state.loading = true;
         state.error = null;
         state.selectedOrder = null;
       })
+
       .addCase(fetchOrderById.fulfilled, (state, action) => {
         state.loading = false;
         state.selectedOrder = action.payload;
       })
+
       .addCase(fetchOrderById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
-  }
+  },
 });
 
 export const {
   clearOrderError,
   clearOrderMessage,
-  clearSelectedOrder
+  clearSelectedOrder,
 } = ordersSlice.actions;
 
 export default ordersSlice.reducer;

@@ -1,29 +1,34 @@
 
 import api from "./api";
 
+// Fetch the logged-in user's cart
 const getCart = async () => {
-  return await api.get("/cart");
+  return api.get("/cart");
 };
 
+// Add a product to the cart
 const addToCart = async (productId, quantity = 1) => {
-  return await api.post("/cart/items", {
+  return api.post("/cart/items", {
     productId,
     quantity,
   });
 };
 
+// Update the quantity of a cart item
 const updateCartItem = async (itemId, quantity) => {
-  return await api.patch(`/cart/items/${itemId}`, {
+  return api.patch(`/cart/items/${itemId}`, {
     quantity,
   });
 };
 
+// Remove an individual cart item
 const removeCartItem = async (itemId) => {
-  return await api.delete(`/cart/items/${itemId}`);
+  return api.delete(`/cart/items/${itemId}`);
 };
 
+// Remove all items from the cart
 const clearCart = async () => {
-  return await api.delete("/cart");
+  return api.delete("/cart");
 };
 
 const cartService = {

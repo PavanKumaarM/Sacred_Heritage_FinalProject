@@ -2,6 +2,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import cartService from "../../services/cartService";
 
+// Fetch logged-in user's cart
 export const fetchCart = createAsyncThunk(
   "cart/fetchCart",
   async (_, { rejectWithValue }) => {
@@ -14,6 +15,7 @@ export const fetchCart = createAsyncThunk(
   }
 );
 
+// Add product to cart
 export const addToCart = createAsyncThunk(
   "cart/addToCart",
   async ({ productId, quantity = 1 }, { rejectWithValue }) => {
@@ -30,6 +32,7 @@ export const addToCart = createAsyncThunk(
   }
 );
 
+// Update cart item quantity
 export const updateCartItem = createAsyncThunk(
   "cart/updateCartItem",
   async ({ itemId, quantity }, { rejectWithValue }) => {
@@ -46,6 +49,7 @@ export const updateCartItem = createAsyncThunk(
   }
 );
 
+// Remove individual cart item
 export const removeCartItem = createAsyncThunk(
   "cart/removeCartItem",
   async (itemId, { rejectWithValue }) => {
@@ -58,6 +62,7 @@ export const removeCartItem = createAsyncThunk(
   }
 );
 
+// Clear entire cart
 export const clearCart = createAsyncThunk(
   "cart/clearCart",
   async (_, { rejectWithValue }) => {
@@ -70,17 +75,23 @@ export const clearCart = createAsyncThunk(
   }
 );
 
+const initialState = {
+  cart: { items: [] },
+  loading: false,
+  error: null,
+  actionLoading: false,
+};
+
 const cartSlice = createSlice({
   name: "cart",
 
-  initialState: {
-    cart: { items: [] },
-    loading: false,
-    error: null,
-    actionLoading: false,
-  },
+  initialState,
 
-  reducers: {},
+  reducers: {
+    clearCartError: (state) => {
+      state.error = null;
+    },
+  },
 
   extraReducers: (builder) => {
     builder
@@ -166,5 +177,7 @@ const cartSlice = createSlice({
       });
   },
 });
+
+export const { clearCartError } = cartSlice.actions;
 
 export default cartSlice.reducer;

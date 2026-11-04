@@ -1,31 +1,48 @@
 
 import api from "./api";
 
-const getAllProducts = async (params = {}) => {
+// Build query parameters for product filtering and pagination
+const buildQueryString = (params = {}) => {
   const query = new URLSearchParams();
 
-  Object.keys(params).forEach((key) => {
-    if (params[key] !== "" && params[key] !== null &&
-        params[key] !== undefined) {
-      query.append(key, params[key]);
+  Object.entries(params).forEach(([key, value]) => {
+    if (
+      value !== "" &&
+      value !== null &&
+      value !== undefined
+    ) {
+      query.append(key, value);
     }
   });
 
-  const queryString = query.toString();
+  return query.toString();
+};
+
+// Fetch products with optional filters, sorting and pagination
+const getAllProducts = async (params = {}) => {
+  const queryString = buildQueryString(params);
 
   const endpoint = queryString
     ? `/products?${queryString}`
     : "/products";
 
-  return await api.get(endpoint);
+  return api.get(endpoint);
 };
 
+// Fetch a single product by ID
 const getProductById = async (id) => {
-  return await api.get(`/products/${id}`);
+  return api.get(`/products/${id}`);
 };
 
-const getProductsByTemple = async (templeId) => {
-  return await api.get(`/products/temple/${templeId}`);
+// Fetch products belonging to a particular temple
+const getProductsByTemple = async (templeId, params = {}) => {
+  const queryString = buildQueryString(params);
+
+  const endpoint = queryString
+    ? `/products/temple/${templeId}?${queryString}`
+    : `/products/temple/${templeId}`;
+
+  return api.get(endpoint);
 };
 
 const productService = {

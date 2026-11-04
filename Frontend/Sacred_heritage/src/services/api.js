@@ -1,13 +1,15 @@
-
-const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api"
+).replace(/\/+$/, "");
 
 async function request(endpoint, method = "GET", body = null) {
   const token = localStorage.getItem("token");
 
-  const headers = {
-    "Content-Type": "application/json"
-  };
+  const headers = {};
+
+  if (body !== null) {
+    headers["Content-Type"] = "application/json";
+  }
 
   if (token) {
     headers.Authorization = `Bearer ${token}`;
@@ -15,33 +17,41 @@ async function request(endpoint, method = "GET", body = null) {
 
   const options = {
     method,
-    headers
+    headers,
   };
 
   if (body !== null) {
     options.body = JSON.stringify(body);
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, options);
+  const response = await fetch(
+    `${API_URL}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`,
+    options
+  );
 
-  // Handle empty responses safely
-  const text = await response.text();
+  const responseText = await response.text();
 
   let data = {};
 
-  if (text) {
+  if (responseText) {
     try {
-      data = JSON.parse(text);
+      data = JSON.parse(responseText);
     } catch {
-      data = { message: text };
+      data = {
+        message: responseText,
+      };
     }
   }
 
-  if (!response.ok) {
-    throw new Error(
-      data.message || `Request failed with status ${response.status}`
-    );
-  }
+ if (!response.ok) {
+  const error = new Error(
+    data.message || `Request failed with status ${response.status}`
+  );
+
+  error.status = response.status;
+
+  throw error;
+}
 
   return data;
 }
@@ -49,14 +59,13 @@ async function request(endpoint, method = "GET", body = null) {
 const api = {
   get: (endpoint) => request(endpoint),
 
-  post: (endpoint, body) =>
-    request(endpoint, "POST", body),
+  post: (endpoint, body) => request(endpoint, "POST", body),
 
-  patch: (endpoint, body) =>
-    request(endpoint, "PATCH", body),
+  patch: (endpoint, body) => request(endpoint, "PATCH", body),
 
-  delete: (endpoint) =>
-    request(endpoint, "DELETE")
+  put: (endpoint, body) => request(endpoint, "PUT", body),
+
+  delete: (endpoint) => request(endpoint, "DELETE"),
 };
 
 export default api;

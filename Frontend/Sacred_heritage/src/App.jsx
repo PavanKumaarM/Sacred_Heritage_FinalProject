@@ -9,7 +9,6 @@ import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import Loader from "./components/common/Loader";
 import ProtectedRoute from "./components/common/ProtectedRoute";
-import AdminRoute from "./components/common/AdminRoute";
 
 import Home from "./pages/Home";
 import ExploreTemples from "./pages/ExploreTemples";
@@ -32,10 +31,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import About from "./pages/About";
-import Admin from "./pages/Admin";
 
 import NotFound from "./pages/NotFound";
-
 
 function App() {
   const dispatch = useDispatch();
@@ -64,14 +61,14 @@ function App() {
 
       <main>
         <Routes>
-          
-          <Route path="*" element={<NotFound />} />
-
+          {/* Home */}
           <Route path="/" element={<Home />} />
 
+          {/* Temples */}
           <Route path="/temples" element={<ExploreTemples />} />
           <Route path="/temples/:id" element={<TempleDetails />} />
 
+          {/* Products */}
           <Route
             path="/temples/:id/products"
             element={<TempleSpecificProducts />}
@@ -80,6 +77,7 @@ function App() {
           <Route path="/products" element={<TempleProducts />} />
           <Route path="/products/:id" element={<ProductDetails />} />
 
+          {/* Darshan */}
           <Route
             path="/temples/:id/darshan"
             element={<DarshanOptions />}
@@ -90,6 +88,7 @@ function App() {
             element={<DarshanBooking />}
           />
 
+          {/* Protected user pages */}
           <Route
             path="/my-bookings"
             element={
@@ -146,18 +145,15 @@ function App() {
             }
           />
 
+          {/* Authentication */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+
+          {/* Other pages */}
           <Route path="/about" element={<About />} />
 
-          <Route
-            path="/admin"
-            element={
-              <AdminRoute>
-                <Admin />
-              </AdminRoute>
-            }
-          />
+          {/* 404 - Keep this route last */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
 

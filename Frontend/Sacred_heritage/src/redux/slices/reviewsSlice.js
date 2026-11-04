@@ -2,6 +2,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import reviewService from "../../services/reviewService";
 
+// Fetch reviews for a product
 export const fetchReviews = createAsyncThunk(
   "reviews/fetchReviews",
   async (productId, { rejectWithValue }) => {
@@ -14,6 +15,7 @@ export const fetchReviews = createAsyncThunk(
   }
 );
 
+// Add a new product review
 export const addReview = createAsyncThunk(
   "reviews/addReview",
   async ({ productId, reviewData }, { rejectWithValue }) => {
@@ -30,6 +32,7 @@ export const addReview = createAsyncThunk(
   }
 );
 
+// Update an existing review
 export const updateReview = createAsyncThunk(
   "reviews/updateReview",
   async ({ reviewId, reviewData }, { rejectWithValue }) => {
@@ -46,6 +49,7 @@ export const updateReview = createAsyncThunk(
   }
 );
 
+// Delete a review
 export const removeReview = createAsyncThunk(
   "reviews/removeReview",
   async (reviewId, { rejectWithValue }) => {
@@ -67,11 +71,17 @@ const reviewsSlice = createSlice({
     error: null,
   },
 
-  reducers: {},
+  reducers: {
+    clearReviews: (state) => {
+      state.reviews = [];
+      state.error = null;
+    },
+  },
 
   extraReducers: (builder) => {
     builder
 
+      // Fetch reviews
       .addCase(fetchReviews.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -87,12 +97,18 @@ const reviewsSlice = createSlice({
         state.error = action.payload;
       })
 
+      // Add review
       .addCase(addReview.fulfilled, (state, action) => {
         if (action.payload) {
           state.reviews.push(action.payload);
         }
       })
 
+      .addCase(addReview.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+
+      // Update review
       .addCase(updateReview.fulfilled, (state, action) => {
         const updatedReview = action.payload;
 
@@ -105,12 +121,23 @@ const reviewsSlice = createSlice({
         }
       })
 
+      .addCase(updateReview.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+
+      // Delete review
       .addCase(removeReview.fulfilled, (state, action) => {
         state.reviews = state.reviews.filter(
           (review) => review._id !== action.payload
         );
+      })
+
+      .addCase(removeReview.rejected, (state, action) => {
+        state.error = action.payload;
       });
   },
 });
+
+export const { clearReviews } = reviewsSlice.actions;
 
 export default reviewsSlice.reducer;

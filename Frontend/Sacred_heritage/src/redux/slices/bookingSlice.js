@@ -2,7 +2,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import bookingService from "../../services/bookingService";
 
-// Fetch darshan types
+// Fetch darshan types for a temple
 export const fetchDarshanTypes = createAsyncThunk(
   "booking/fetchDarshanTypes",
   async (templeId, thunkAPI) => {
@@ -33,7 +33,7 @@ export const fetchAvailableSlots = createAsyncThunk(
   }
 );
 
-// Create booking
+// Create a darshan booking
 export const createBooking = createAsyncThunk(
   "booking/createBooking",
   async (bookingData, thunkAPI) => {
@@ -46,7 +46,7 @@ export const createBooking = createAsyncThunk(
   }
 );
 
-// Fetch booking history
+// Fetch booking and order history
 export const fetchHistory = createAsyncThunk(
   "booking/fetchHistory",
   async (_, thunkAPI) => {
@@ -55,7 +55,7 @@ export const fetchHistory = createAsyncThunk(
 
       return {
         bookings: response.history?.bookings || [],
-        orders: response.history?.orders || []
+        orders: response.history?.orders || [],
       };
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
@@ -63,7 +63,7 @@ export const fetchHistory = createAsyncThunk(
   }
 );
 
-// Cancel booking
+// Cancel a booking
 export const cancelBooking = createAsyncThunk(
   "booking/cancelBooking",
   async (bookingId, thunkAPI) => {
@@ -88,7 +88,7 @@ const bookingSlice = createSlice({
     loading: false,
     actionLoading: false,
     error: null,
-    successMessage: ""
+    successMessage: "",
   },
 
   reducers: {
@@ -102,7 +102,7 @@ const bookingSlice = createSlice({
 
     clearSlots: (state) => {
       state.slots = [];
-    }
+    },
   },
 
   extraReducers: (builder) => {
@@ -113,10 +113,12 @@ const bookingSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
+
       .addCase(fetchDarshanTypes.fulfilled, (state, action) => {
         state.loading = false;
         state.darshanTypes = action.payload;
       })
+
       .addCase(fetchDarshanTypes.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
@@ -128,10 +130,12 @@ const bookingSlice = createSlice({
         state.error = null;
         state.slots = [];
       })
+
       .addCase(fetchAvailableSlots.fulfilled, (state, action) => {
         state.loading = false;
         state.slots = action.payload;
       })
+
       .addCase(fetchAvailableSlots.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
@@ -143,11 +147,18 @@ const bookingSlice = createSlice({
         state.error = null;
         state.successMessage = "";
       })
+
       .addCase(createBooking.fulfilled, (state, action) => {
         state.actionLoading = false;
         state.selectedBooking = action.payload;
+
+        if (action.payload) {
+          state.bookings.unshift(action.payload);
+        }
+
         state.successMessage = "Darshan booking created successfully!";
       })
+
       .addCase(createBooking.rejected, (state, action) => {
         state.actionLoading = false;
         state.error = action.payload;
@@ -158,11 +169,13 @@ const bookingSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
+
       .addCase(fetchHistory.fulfilled, (state, action) => {
         state.loading = false;
         state.bookings = action.payload.bookings;
         state.orders = action.payload.orders;
       })
+
       .addCase(fetchHistory.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
@@ -173,26 +186,38 @@ const bookingSlice = createSlice({
         state.actionLoading = true;
         state.error = null;
       })
+
       .addCase(cancelBooking.fulfilled, (state, action) => {
         state.actionLoading = false;
 
-        state.bookings = state.bookings.map((booking) =>
-          booking._id === action.payload._id ? action.payload : booking
-        );
+        if (action.payload?._id) {
+          state.bookings = state.bookings.map((booking) =>
+            booking._id === action.payload._id
+              ? action.payload
+              : booking
+          );
+
+          if (
+            state.selectedBooking?._id === action.payload._id
+          ) {
+            state.selectedBooking = action.payload;
+          }
+        }
 
         state.successMessage = "Booking cancelled successfully!";
       })
+
       .addCase(cancelBooking.rejected, (state, action) => {
         state.actionLoading = false;
         state.error = action.payload;
       });
-  }
+  },
 });
 
 export const {
   clearBookingError,
   clearBookingMessage,
-  clearSlots
+  clearSlots,
 } = bookingSlice.actions;
 
 export default bookingSlice.reducer;

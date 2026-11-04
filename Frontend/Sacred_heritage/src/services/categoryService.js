@@ -1,8 +1,9 @@
 
 import api from "./api";
 
+// Fetch all active product categories
 const getAllCategories = async () => {
-  return await api.get("/categories");
+  return api.get("/categories");
 };
 
 const categoryService = {

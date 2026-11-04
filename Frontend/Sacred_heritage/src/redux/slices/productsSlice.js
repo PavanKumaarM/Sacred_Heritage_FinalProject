@@ -2,6 +2,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import productService from "../../services/productService";
 
+// Fetch products with search, filters, sorting and pagination
 export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
   async (params = {}, { rejectWithValue }) => {
@@ -18,6 +19,7 @@ export const fetchProducts = createAsyncThunk(
   }
 );
 
+// Fetch a single product by ID
 export const fetchProductById = createAsyncThunk(
   "products/fetchProductById",
   async (id, { rejectWithValue }) => {
@@ -31,13 +33,20 @@ export const fetchProductById = createAsyncThunk(
   }
 );
 
+// Fetch products belonging to a particular temple
 export const fetchProductsByTemple = createAsyncThunk(
   "products/fetchProductsByTemple",
-  async (templeId, { rejectWithValue }) => {
+  async ({ templeId, params = {} }, { rejectWithValue }) => {
     try {
-      const response = await productService.getProductsByTemple(templeId);
+      const response = await productService.getProductsByTemple(
+        templeId,
+        params
+      );
 
-      return response.products || [];
+      return {
+        products: response.products || [],
+        pagination: response.pagination || null,
+      };
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -52,6 +61,7 @@ const productsSlice = createSlice({
     selectedProduct: null,
     templeProducts: [],
     pagination: null,
+    templePagination: null,
     loading: false,
     error: null,
   },
@@ -107,7 +117,8 @@ const productsSlice = createSlice({
 
       .addCase(fetchProductsByTemple.fulfilled, (state, action) => {
         state.loading = false;
-        state.templeProducts = action.payload;
+        state.templeProducts = action.payload.products;
+        state.templePagination = action.payload.pagination;
       })
 
       .addCase(fetchProductsByTemple.rejected, (state, action) => {

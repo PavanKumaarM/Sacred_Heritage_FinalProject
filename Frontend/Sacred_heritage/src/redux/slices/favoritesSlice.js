@@ -1,29 +1,39 @@
 
 import { createSlice } from "@reduxjs/toolkit";
 
-const savedFavorites = localStorage.getItem("favorites");
+// Load saved favorites safely
+const getSavedFavorites = () => {
+  try {
+    const savedFavorites = localStorage.getItem("favorites");
 
-const initialFavorites = savedFavorites
-  ? JSON.parse(savedFavorites)
-  : [];
+    return savedFavorites ? JSON.parse(savedFavorites) : [];
+  } catch (error) {
+    console.error("Unable to load favorites:", error);
+    return [];
+  }
+};
+
+const initialState = {
+  favorites: getSavedFavorites(),
+};
 
 const favoritesSlice = createSlice({
   name: "favorites",
 
-  initialState: {
-    favorites: initialFavorites,
-  },
+  initialState,
 
   reducers: {
+    // Add product to favorites
     addFavorite: (state, action) => {
       const product = action.payload;
 
-      const exists = state.favorites.find(
+      const exists = state.favorites.some(
         (item) => item._id === product._id
       );
 
       if (!exists) {
         state.favorites.push(product);
+
         localStorage.setItem(
           "favorites",
           JSON.stringify(state.favorites)
@@ -31,6 +41,7 @@ const favoritesSlice = createSlice({
       }
     },
 
+    // Remove product from favorites
     removeFavorite: (state, action) => {
       state.favorites = state.favorites.filter(
         (item) => item._id !== action.payload
@@ -42,6 +53,7 @@ const favoritesSlice = createSlice({
       );
     },
 
+    // Clear all favorites
     clearFavorites: (state) => {
       state.favorites = [];
 
