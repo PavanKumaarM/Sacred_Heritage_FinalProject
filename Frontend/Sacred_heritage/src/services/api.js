@@ -1,6 +1,6 @@
 
 const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:7000/api";
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 async function request(endpoint, method = "GET", body = null) {
   const token = localStorage.getItem("token");
