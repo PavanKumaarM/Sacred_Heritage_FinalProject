@@ -1,4 +1,3 @@
-
 const router = require("express").Router();
 
 const {
@@ -11,14 +10,8 @@ const asyncHandler = require("../middleware/asyncHandler");
 
 router.use(protect);
 
-router.post(
-    "/pay",
-    asyncHandler(createPayment)
-);
+router.post("/pay", asyncHandler(createPayment));
 
-router.get(
-    "/:paymentId",
-    asyncHandler(getPayment)
-);
+router.get("/:paymentId", asyncHandler(getPayment));
 
 module.exports = router;

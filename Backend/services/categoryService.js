@@ -1,6 +1,20 @@
+
+const mongoose = require("mongoose");
 const Category = require("../models/Category");
 
+const createError = (message, statusCode) => {
+    const error = new Error(message);
+    error.statusCode = statusCode;
+    return error;
+};
+
 class CategoryService {
+
+    static validateId(id) {
+        if (!mongoose.isValidObjectId(id)) {
+            throw createError("Invalid category ID", 400);
+        }
+    }
 
     static async createCategory(data) {
         return await Category.create(data);
@@ -13,8 +27,14 @@ class CategoryService {
     }
 
     static async updateCategory(id, data) {
+        this.validateId(id);
 
-        const allowedFields = ["name", "description", "image", "isActive"];
+        const allowedFields = [
+            "name",
+            "description",
+            "image",
+            "isActive"
+        ];
 
         const updates = {};
 
@@ -34,13 +54,14 @@ class CategoryService {
         );
 
         if (!category) {
-            throw new Error("Category not found");
+            throw createError("Category not found", 404);
         }
 
         return category;
     }
 
     static async deleteCategory(id) {
+        this.validateId(id);
 
         const category = await Category.findByIdAndUpdate(
             id,
@@ -49,7 +70,7 @@ class CategoryService {
         );
 
         if (!category) {
-            throw new Error("Category not found");
+            throw createError("Category not found", 404);
         }
 
         return category;

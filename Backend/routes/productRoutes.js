@@ -2,44 +2,42 @@ const express = require("express");
 const router = express.Router();
 
 const productController = require("../controllers/productController");
+const { protect } = require("../middleware/auth.middleware");
+const asyncHandler = require("../middleware/asyncHandler");
 
-const authMiddleware = require("../middleware/authMiddleware");
-const adminMiddleware = require("../middleware/adminMiddleware");
-
-// Get products belonging to a particular temple
+// Public routes
 router.get(
     "/temple/:templeId",
-    productController.getProductsByTemple
+    asyncHandler(productController.getProductsByTemple)
 );
 
-// Get all products with search, filters and sorting
-router.get("/", productController.getAllProducts);
+router.get(
+    "/",
+    asyncHandler(productController.getAllProducts)
+);
 
-// Get individual product
-router.get("/:id", productController.getProductById);
+router.get(
+    "/:id",
+    asyncHandler(productController.getProductById)
+);
 
-// Add product
+// Authenticated routes
 router.post(
     "/",
-    authMiddleware,
-    adminMiddleware,
-    productController.createProduct
+    protect,
+    asyncHandler(productController.createProduct)
 );
 
-// Update product
 router.patch(
     "/:id",
-    authMiddleware,
-    adminMiddleware,
-    productController.updateProduct
+    protect,
+    asyncHandler(productController.updateProduct)
 );
 
-// Delete product
 router.delete(
     "/:id",
-    authMiddleware,
-    adminMiddleware,
-    productController.deleteProduct
+    protect,
+    asyncHandler(productController.deleteProduct)
 );
 
 module.exports = router;

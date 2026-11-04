@@ -1,5 +1,8 @@
 const path = require("path");
 
+const mongoose = require("mongoose");
+
+
 require("dotenv").config({
   path: path.join(__dirname, ".env"),
 });
@@ -23,9 +26,12 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/health", (req, res) => {
-  res.json({
-    success: true,
-    message: "Transaction Backend Running",
+  const dbConnected = mongoose.connection.readyState === 1;
+
+  res.status(dbConnected ? 200 : 503).json({
+    success: dbConnected,
+    server: "Running",
+    database: dbConnected ? "Connected" : "Disconnected",
   });
 });
 

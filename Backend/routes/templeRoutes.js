@@ -1,34 +1,25 @@
+
 const express = require("express");
 const router = express.Router();
 
 const templeController = require("../controllers/templeController");
+const { protect } = require("../middleware/auth.middleware");
+const asyncHandler = require("../middleware/asyncHandler");
 
-const authMiddleware = require("../middleware/authMiddleware");
-const adminMiddleware = require("../middleware/adminMiddleware");
+// Public routes
+router.get("/", asyncHandler(templeController.getAllTemples));
 
-router.get("/", templeController.getAllTemples);
+// Temple details with associated products
+router.get("/:id/details", asyncHandler(templeController.getTempleDetails));
 
-router.get("/:id", templeController.getTempleById);
+// Individual temple
+router.get("/:id", asyncHandler(templeController.getTempleById));
 
-router.post(
-    "/",
-    authMiddleware,
-    adminMiddleware,
-    templeController.createTemple
-);
+// Authenticated routes
+router.post("/", protect, asyncHandler(templeController.createTemple));
 
-router.patch(
-    "/:id",
-    authMiddleware,
-    adminMiddleware,
-    templeController.updateTemple
-);
+router.patch("/:id", protect, asyncHandler(templeController.updateTemple));
 
-router.delete(
-    "/:id",
-    authMiddleware,
-    adminMiddleware,
-    templeController.deleteTemple
-);
+router.delete("/:id", protect, asyncHandler(templeController.deleteTemple));
 
 module.exports = router;

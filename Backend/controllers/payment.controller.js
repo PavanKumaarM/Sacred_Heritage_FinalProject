@@ -1,15 +1,14 @@
-
 const paymentService = require("../services/payment.service");
 
 exports.createPayment = async (req, res) => {
     const { orderId } = req.body;
 
     const result = await paymentService.createPayment(
-        req.user.id,
+        req.user._id,
         orderId
     );
 
-    res.status(201).json({
+    res.status(result.reused ? 200 : 201).json({
         success: true,
         message: result.message,
         data: result
@@ -18,7 +17,7 @@ exports.createPayment = async (req, res) => {
 
 exports.getPayment = async (req, res) => {
     const payment = await paymentService.getPayment(
-        req.user.id,
+        req.user._id,
         req.params.paymentId
     );
 

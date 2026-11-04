@@ -1,4 +1,5 @@
 
+const mongoose = require("mongoose");
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 
@@ -27,7 +28,11 @@ const addItem = async (req, res) => {
   const userId = req.user.id || req.user._id;
   const { productId, quantity = 1 } = req.body;
 
-  if (!productId || !Number.isInteger(quantity) || quantity < 1) {
+  if (
+    !mongoose.isValidObjectId(productId) ||
+    !Number.isInteger(quantity) ||
+    quantity < 1
+  ) {
     return res.status(400).json({
       success: false,
       message: "Valid productId and quantity are required"
@@ -63,7 +68,7 @@ const addItem = async (req, res) => {
   }
 
   const existingItem = cart.items.find(
-    item => item.productId.toString() === productId
+    item => item.productId.toString() === productId.toString()
   );
 
   if (existingItem) {
@@ -78,6 +83,9 @@ const addItem = async (req, res) => {
 
     existingItem.quantity = newQuantity;
     existingItem.price = product.price;
+    existingItem.name = product.name;
+    existingItem.image = product.image;
+
   } else {
     cart.items.push({
       productId: product._id,
@@ -103,10 +111,14 @@ const updateItem = async (req, res) => {
   const { itemId } = req.params;
   const { quantity } = req.body;
 
-  if (!Number.isInteger(quantity) || quantity < 1) {
+  if (
+    !mongoose.isValidObjectId(itemId) ||
+    !Number.isInteger(quantity) ||
+    quantity < 1
+  ) {
     return res.status(400).json({
       success: false,
-      message: "Quantity must be at least 1"
+      message: "Quantity must be at least 1 and item ID must be valid"
     });
   }
 
@@ -146,6 +158,8 @@ const updateItem = async (req, res) => {
 
   item.quantity = quantity;
   item.price = product.price;
+  item.name = product.name;
+  item.image = product.image;
 
   await cart.save();
 
@@ -160,6 +174,13 @@ const updateItem = async (req, res) => {
 const removeItem = async (req, res) => {
   const userId = req.user.id || req.user._id;
   const { itemId } = req.params;
+
+  if (!mongoose.isValidObjectId(itemId)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid cart item ID"
+    });
+  }
 
   const cart = await Cart.findOne({ user: userId });
 

@@ -2,35 +2,32 @@ const express = require("express");
 const router = express.Router();
 
 const categoryController = require("../controllers/categoryController");
+const { protect } = require("../middleware/auth.middleware");
+const asyncHandler = require("../middleware/asyncHandler");
 
-const authMiddleware = require("../middleware/authMiddleware");
-const adminMiddleware = require("../middleware/adminMiddleware");
+// Public route
+router.get(
+    "/",
+    asyncHandler(categoryController.getAllCategories)
+);
 
-// Get all categories
-router.get("/", categoryController.getAllCategories);
-
-// Create category
+// Authenticated routes
 router.post(
     "/",
-    authMiddleware,
-    adminMiddleware,
-    categoryController.createCategory
+    protect,
+    asyncHandler(categoryController.createCategory)
 );
 
-// Update category
 router.patch(
     "/:id",
-    authMiddleware,
-    adminMiddleware,
-    categoryController.updateCategory
+    protect,
+    asyncHandler(categoryController.updateCategory)
 );
 
-// Delete category
 router.delete(
     "/:id",
-    authMiddleware,
-    adminMiddleware,
-    categoryController.deleteCategory
+    protect,
+    asyncHandler(categoryController.deleteCategory)
 );
 
 module.exports = router;

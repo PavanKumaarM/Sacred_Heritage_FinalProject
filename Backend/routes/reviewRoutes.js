@@ -2,34 +2,34 @@ const express = require("express");
 const router = express.Router();
 
 const reviewController = require("../controllers/reviewController");
+const { protect } = require("../middleware/auth.middleware");
+const asyncHandler = require("../middleware/asyncHandler");
 
-const authMiddleware = require("../middleware/authMiddleware");
-
-// Create review
+// Create review - Login required
 router.post(
     "/product/:productId",
-    authMiddleware,
-    reviewController.createReview
+    protect,
+    asyncHandler(reviewController.createReview)
 );
 
-// Get product reviews
+// Get product reviews - Public
 router.get(
     "/product/:productId",
-    reviewController.getProductReviews
+    asyncHandler(reviewController.getProductReviews)
 );
 
-// Update review
+// Update review - Login required
 router.patch(
     "/:reviewId",
-    authMiddleware,
-    reviewController.updateReview
+    protect,
+    asyncHandler(reviewController.updateReview)
 );
 
-// Delete review
+// Delete review - Login required
 router.delete(
     "/:reviewId",
-    authMiddleware,
-    reviewController.deleteReview
+    protect,
+    asyncHandler(reviewController.deleteReview)
 );
 
 module.exports = router;

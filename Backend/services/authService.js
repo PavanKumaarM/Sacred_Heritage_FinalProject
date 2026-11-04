@@ -6,10 +6,13 @@ const TokenService = require("../jwt/tokenService");
 class AuthService {
 
     static async signup(data) {
-
         const { name, email, password, phone } = data;
 
-        if (!name || !email || !password) {
+        if (
+            !name?.trim() ||
+            !email?.trim() ||
+            !password
+        ) {
             const error = new Error(
                 "Name, email and password are required"
             );
@@ -40,7 +43,7 @@ class AuthService {
         const hashedPassword = await bcrypt.hash(password, 12);
 
         const user = await User.create({
-            name,
+            name: name.trim(),
             email: normalizedEmail,
             password: hashedPassword,
             phone
@@ -53,16 +56,19 @@ class AuthService {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                phone: user.phone,
-                role: user.role
+                phone: user.phone
             },
             token
         };
     }
 
     static async login(email, password) {
-
-        if (!email || !password) {
+        if (
+            typeof email !== "string" ||
+            !email.trim() ||
+            typeof password !== "string" ||
+            !password
+        ) {
             const error = new Error(
                 "Email and password are required"
             );
@@ -98,8 +104,7 @@ class AuthService {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                phone: user.phone,
-                role: user.role
+                phone: user.phone
             },
             token
         };
